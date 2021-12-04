@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html>
+<body>
+<head>
+<script src="jquery-3.0.0.min.js"></script>
+</head>
+
+<style>
+
+body{
+ background-color: grey;
+}
+
+#myCanvas{
+ position: relative;
+ border: 1px solid black;
+ background-color: white;
+ overflow: auto;
+ left: 0px;
+ top: 0px;
+}
+#canvasContainer{
+ position: absolute;
+ border: 1px solid black;
+ overflow: scroll;
+ width: 1000px;
+ height: 500px;
+ left: 200px;
+ top: 80px;
+}
+#toolBar{
+ position: absolute;
+ top: 80px;
+ left: 0px;
+ border: 1px solid black;
+ background-color: hsla(191, 0%, 78%, 1);
+ overflow: scroll;
+ height: 500px;
+ width: 160px;
+}
+.colors{
+ border: 1px solid black;
+ display: inline-block;
+ margin-top: 3px;
+ margin-left: 3px;
+ width: 65px;
+ height: 65px;
+ cursor: pointer;
+}
+#background{
+ position: absolute;
+ left: -20px;
+ top: -20px;
+ width: 1320px;
+ height: 700px;
+ border: 1px solid black;
+ background-color: hsla(19, 0%, 40%, 1);
+}
+#tittle{
+  position: absolute;
+  left: 500px;
+  font-size: 30px;
+  text-shadow: 2px 2px 5px black;
+  color: black;
+}
+body{
+ overflow: hidden; 
+}
+#myCanvas{
+ border: 1px solid blue;
+ cursor: default;
+ margin: 0px;
+}
+#toolSide{
+ position: absolute;
+ top: 80px;
+ left: 1210px;
+ width: 150px;
+ height: 500px;
+}
+.tools{
+ font-family: verdana;
+ cursor: pointer;
+ margin: 5px;
+}
+</style>
+
+<p id="tittle">32-bit Image Creator</p>
+
+<div id="toolBar">
+  <div style="position: fixed; left: 0px; width: 143px; cursor: text; height: 30px; background-color: hsla(191, 0%, 78%, 1); border-left: 1px solid black;">
+   <input type="text" id="search" style="width:130px;margin-top: 5px;margin-left: 2px; cursor: text;"></input>
+  </div>
+  <div style="position: fixed; left: 0px; top: 530px; cursor: pointer; width: 143px; height: 50px; background-color: hsla(191, 0%, 78%, 1); border-left: 1px solid black;">
+   <img src="https://cdn3.vectorstock.com/i/1000x1000/75/97/trash-can-black-simple-icon-vector-7197597.jpg" width="50px" height="50px" style="position:relative;left:44px;visibility:visible;" id="trash">
+   <img src="https://www.nicepng.com/png/detail/191-1910611_back-arrow-arrows-buttons-back-icon-png.png" width="50px" height="50px" style="position:relative;left:0px;visibility:hidden;" id="GoBack">
+ </div>
+  <div id="startingPoint" style="display: inline-block; width: 100px; height: 30px; "></div>
+  
+  
+  
+  <div style="display: inline-block; width: 100px; height: 30px; cursor: pointer;"></div> 
+</div>
+
+<div id="canvasContainer">
+ <canvas id="myCanvas" height="500px" width="1000px"> not working</canvas>
+</div>
+
+<div id="toolSide">
+ <p class="tools" id="gridTools">Grid Tools</p>
+ <p class="tools" id="imageTools">Image Tools</p>
+ <p class="tools" id="drawingTools">Drawing Tools</p>
+ 
+ <form id="register" action="writeFile.php" method="post">
+  <p style="font-family: verdana;margin: 5px;">Save File Here:</p>
+  <input type="text" name="name" value="name"><br>
+  <input type="text" id="content" name="content" style="visibility:hidden;"><br>
+  <input type="submit" value="Submit">
+ </form>
+ 
+</div>
+
+<img id="image" src="https://i.pinimg.com/474x/25/bb/ea/25bbead60b9045cdc1d2ac54c253e972--german-soldier-pixel-art.jpg" alt="The Scream" style="visibility:hidden;">
+
+<script>
+
+//get canvas elements and drawing variables
+var c = document.getElementById('myCanvas');
+var ctx = c.getContext('2d');
+
+var $colors = $(".colors");		//all of the colors in the tool bar
+var $trash = $('#trash');       //The trash picture at the bottom of the toolbar
+var $GoBack = $('#GoBack');     //go back to the colors on the color select
+var $canvas = $("#myCanvas");	//gets canvas element
+var position = $canvas.position();	//canvas potition
+
+var $searchImage = $('#searchImage'); //the search bar for the image selection
+var $image = $('#image'); //the new image to be created and appended to the image container
+
+var $focusColor = "black";		//the color that is selected 
+var $search = $('#search');		//to search bar input element
+var $toolBar = $('#toolBar');	//to side bar containing the colors
+
+var $tools = $(".tools");			//all of the elements bellow
+var $specialTools = $('.specialTools');		//all of the special tools, such as text boxes
+var $gridTools = $("#gridTools");		//the grid Tools element
+var $imageTools = $("#imageTools");		//the image tools element
+var $drawingTools = $('#drawingTools');		//the drawing tools element
+var $saveImage = $('#saveImage');       //the save Image search bar
+
+var gridToolsStatus = "closed";
+var imageToolsStatus = "closed";
+var drawingToolsStatus = "closed";
+var adjPosStatus = 'closed';
+var displayStatus = 'closed';
+
+var eraseTile = 'no';
+
+var drawRectStatus = 'no';
+var drawRectInit = 'no';
+var drawRectStart = [];
+var fillRectArrayX = [];
+var fillRectArrayY = [];
+var fillRectIndex = 0;
+
+var eraseRectStatus = 'no';
+var eraseRectInit = 'no';
+var eraseRectStart = [];
+var eraseRectArrayX = [];
+var eraseRectArrayY = [];
+var eraseRectIndex = 0;
+
+var $adjGridSign = "<p id='adjGridSign' style='margin-bottom: 0px; margin-left: 5px; color: white;'>Adjust Grid Size: </p>";
+var $addGrid = "<p class='tools' id='addGrid' style='font-size: 200%; margin: 0px; margin-left: 10px; cursor: pointer; display: inline-block;'>+</p>";
+var $subGrid = "<p class='tools' id='subGrid' style='font-size: 200%; margin: 0px; margin-left: 10px; cursor: pointer; display: inline-block;'>-</p>";
+
+var $addTileSign = "<p id='addTileSign' style='margin-bottom: 0px; margin-left: 5px; color: white;'>Adjust Tile Size: </p>";
+var $addTileSize = "<p class='tools' id='addTileSize' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>+</p>";
+var $subTileSize = "<p class='tools' id='subTileSize' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>-</p>";
+
+
+var $addSizeSign = "<p id='addSizeSign' style='margin-bottom: 0px; margin-left: 5px; color: white;'>Adjust Size: </p>";
+var $addSize = "<p class='tools' id='addSize' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>+</p>";
+var $subSize = "<p class='tools' id='subSize' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>-</p>";
+
+var $adjHeightSign = "<p id='adjHeightSign' style='margin-bottom: 0px; margin-left: 5px; color: white;'>Adjust height: </p>";
+var $addHeight = "<p class='tools' id='addHeight' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>+</p>";
+var $subHeight = "<p class='tools' id='subHeight' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>-</p>";
+
+var $adjWidthSign = "<p id='adjWidthSign' style='margin-bottom: 0px; margin-left: 5px; color: white;'>Adjust Width: </p>";
+var $addWidth = "<p class='tools' id='addWidth' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>+</p>";
+var $subWidth = "<p class='tools' id='subWidth' style='font-size: 200%; margin-top: 3px; margin-left: 10px; cursor: pointer; display: inline-block;'>-</p>";
+
+var $adjImageSign = "<p id='adjImageSign' style='margin-bottom: 10px; margin-left: 5px; color: white;'>Adjust Image: </p>";
+var $adjImage = '<img id="adjustedImage" src=' + $('#image').attr('src') + ' alt="The Scream" height="50px" width="50px" style="margin-left: 5px; border: 1px solid black;">';
+var $imageInput = "<input id='imageInput' style='margin-left: 3px; width: 120px;'></input>";
+
+var $adjPos = "<p class='specialTools' id='adjPos' style='margin-bottom: 0px; margin-left: 5px; color: white; cursor: pointer; border: 1px solid grey;'>Adjust Position: </p>";
+var $adjPosSquare = "<div id='adjPosSquare' style='position: absolute; border: 1px solid blue; width: 20px; height: 20px; background-color: blue; z-index: 10; cursor: pointer;'></div>"
+var adjPosMove = 'no';
+
+var $erase = "<p class='specialTools' id='erase' style='margin-bottom: 0px; margin-left: 5px; color: white; cursor: pointer;' >Eraser </p>";
+
+var $drawRect = "<p class='specialTools' id='drawRect' style='margin-bottom: 0px; margin-left: 5px; color: white; cursor: pointer;' >Draw Rect </p>";
+
+var $eraseRect = "<p class='specialTools' id='eraseRect' style='margin-bottom: 0px; margin-left: 5px; color: white; cursor: pointer;' >Erase Rect </p>";
+
+var $compileImageSign = "<p id='compileImageSign' style='margin-bottom: 10px; margin-left: 5px; color: white;'>Add url: </p>";
+var $compileImage = "<input id='compileImage' style='margin-left: 3px; width: 120px;'></input>";
+
+var $rotate = "<p class='specialTools' id='rotate' style='margin-bottom: 0px; margin-left: 5px; color: white; cursor: pointer;' >Rotate Image </p>";
+var $rotateImage = 'off';
+var rotateVal = 0;
+
+//var $displayArrays = "<p id='displayArrays' class ='specialTools' style='margin-bottom: 10px; margin-left: 5px; color: white; cursor: pointer;'>Display Arrays:</p>";
+
+//var displayAlert = '';
+//var $displayPage = "<p id='displayPage' style='position: absolute; left: 100px; border: 1px solid red; width: 1000px; height: 800px; background-color: white;'></p>";
+
+var compileX = [];
+var compileY = [];
+var compileColors = [];
+
+ function getArrays(url){
+
+var posInit0;
+
+	$.ajax({
+
+		async: false,
+
+		url: url,
+
+		success: function(data){
+			
+			
+		  //posInit0 = data.search('&000');
+			
+	      if(posInit0 != -1){
+			
+			posInit1 = data.indexOf("&", 0);
+			
+			firstVal = data.slice(0,posInit1);
+			val = '';
+			firstInd = 0;
+			
+			var i = 0;
+			for(i = 0; i < firstVal.length; i++){
+			 if(firstVal[i] != '[' && firstVal[i] != "," && firstVal[i] != ']'){
+				val += firstVal[i];
+			 }else if(val != ''){
+			  compileX[firstInd] = parseInt(val);
+			  firstInd++;
+			  val = '';
+			 }
+			}
+			
+			posInit2 = data.indexOf("&", posInit1+1);
+			
+			firstVal = data.slice(posInit1 + 1,posInit2);
+			val = '';
+			firstInd = 0;
+			
+			var i = 0;
+			for(i = 0; i < firstVal.length; i++){
+			 if(firstVal[i] != '[' && firstVal[i] != "," && firstVal[i] != ']'){
+				val += firstVal[i];
+			 }else if(val != ''){
+			  compileY[firstInd] = parseInt(val);
+			  firstInd++;
+			  val = '';
+			 }
+			}
+			
+			firstVal = data.slice(posInit2 + 1, data.length);
+			val = '';
+			firstInd = 0;
+			
+			var i = 0;
+			for(i = 0; i < firstVal.length; i++){
+			 if(firstVal[i] != '[' && firstVal[i] != "," && firstVal[i] != ']'){
+				val += firstVal[i];
+			 }else if(val != ''){
+			  compileColors[firstInd] = val;
+			  firstInd++;
+			  val = '';
+			 }
+			 if(firstVal[i] == "&"){
+			  i = firstVal.length;
+			 }
+			}
+			
+		  }
+		}
+	
+	});
+	
+if(posInit0 == -1){
+ return 'no'; 
+}
+
+}
+
+function writeArrays(){
+
+    var xMinus = 100000;
+  
+    for(i = 0; i < xVals.length; i++){  //fills in all of the colored pixels
+	 if(xVals[i] < xMinus){
+	  xMinus = xVals[i];
+	  //window.alert(xMinus);
+	 }
+    }
+  
+    var yMinus = 100000;
+  
+    for(i = 0; i < yVals.length; i++){  //fills in all of the colored pixels
+	 if(yVals[i] < yMinus){
+	  yMinus = yVals[i];
+	  //window.alert(yMinus);
+	 }
+    }
+  
+    var i = 0;
+
+	displayAlert = '[';
+	
+	for(i = 0; i < xVals.length; i++){
+	 displayAlert += xVals[i]-xMinus;
+	 
+	 if(xVals.length - i == 1){
+	  displayAlert +=  "]&";
+	 }else{
+	  displayAlert += ', ';
+	 }
+	}
+	
+	var i = 0;
+	 
+	displayAlert +='[';
+	
+	for(i = 0; i < yVals.length; i++){
+	 displayAlert += yVals[i]-yMinus;
+	 
+	 if(yVals.length - i == 1){
+	  displayAlert += ']&';
+	 }else{
+	  displayAlert += ', ';
+	 }
+	}
+	
+	var i = 0;
+	 
+	displayAlert += '[';
+	
+	for(i = 0; i < yVals.length; i++){
+	 displayAlert += colorVals[i];
+	 
+	 if(colorVals.length - i == 1){
+	  displayAlert += ']';
+	 }else{
+	  displayAlert += ', ';
+	 }
+	}
+	
+	//displayAlert += '<tileSize> pixel.tileSize = ' + tileSize + '; ' + '</tileSize>' + '<br>' + '</image>' + '<br>' + '</images>';
+	
+	$('#content').val( displayAlert);
+}
+
+var $startingPoint = $('#startingPoint');	//tells where the colors are to be inserted
+var colorIndex = ['red', 'orange', 'yellow', 'green', 'blue', 'violet', 'purple', 'pink', 'navy'];	//an array of all the colors
+var $canvasContainer = $('#canvasContainer');
+var $element;	//used when creating a new element
+var tileSize = 10; //used to set the size of the tiles on the canvas element
+var x,y;        //used in the $canvas.onClick and onMousemove functions
+
+var imageSize = [500, 500];
+var imagePos = [10, 10];
+
+//stores the values of all the pixels
+var xVals = new Array();
+var yVals = new Array();
+var colorVals = new Array();
+var index = 0;
+
+var yamss;
+
+var selectImage = document.getElementById('image');
+
+drawGrid();
+
+fillColors();
+
+var plot = function(e){
+
+ //finds the simplified x and y coordinates to set the array values for xVals, yVals, and colorVals
+ x = Math.floor( (e.pageX - $canvas.offset().left) / tileSize );
+ y = Math.floor( (e.pageY - $canvas.offset().top) / tileSize );
+ 
+ if(eraseTile == 'no' && drawRectStatus == 'no' && adjPosMove == 'no' && eraseRectStatus == 'no'){
+   //adds in the colored pixels
+   ctx.fillStyle = $focusColor;
+   ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+ 
+   //adds the x and y values to the arrays
+   xVals[index] = x;
+   yVals[index] = y;
+   colorVals[index] = $focusColor;
+   index++;
+ }else if(eraseTile == 'yes'){
+ 
+  var i = 0;
+  for(i = 0; i < xVals.length; i++){
+   if(x == xVals[i]){
+     
+	 $search.val('yes');
+	 
+	 var j = 0;
+     for(j = 0; j < yVals.length; j++){
+	 
+	    if(y == yVals[j] && x == xVals[j]){
+		 
+		  yVals.splice(j,1);
+		  xVals.splice(j,1);
+		  colorVals.splice(j,1);
+		  
+		  j = yVals.length;
+		 
+		  index--;
+		}
+	  
+	 }
+	 
+	 i = xVals.length;
+   
+   }else{
+   
+     $search.val('no');
+	
+   }
+  } 
+ } 
+ 
+ if(drawRectStatus == 'yes' && eraseRectStatus == 'no'){
+ 
+  drawRectInit = 'no';
+  
+  for(i = 0; i < fillRectArrayX.length; i++){
+  
+   ctx.fillStyle = $focusColor;
+   ctx.fillRect(fillRectArrayX[i]*tileSize, fillRectArrayY[i]*tileSize, tileSize, tileSize);
+ 
+   //adds the x and y values to the arrays
+   xVals[index] = fillRectArrayX[i];
+   yVals[index] = fillRectArrayY[i];
+   colorVals[index] = $focusColor;
+   
+   index++;
+ 
+  }
+  
+  fillRectArrayX = [];
+  fillRectArrayY = [];
+  
+  drawRectStart = [];
+  
+ }
+
+ if(eraseRectStatus == 'yes'){
+ 
+  eraseRectInit = 'no';
+    
+	var i = 0;
+    for(i = 0; i < xVals.length; i++){
+	 if(eraseRectStart[0] <= xVals[i] && xVals[i] <= x){
+	  if(eraseRectStart[1] <= yVals[i] && yVals[i] <= y){
+	      yVals[i] = 'Null';
+		  xVals[i] = 'Null';
+		  colorVals[i] = 'Null';
+	  }
+	 }
+	}  
+	
+	var i = 0;
+    for(i = 0; i < colorVals.length; i++){
+	   if(colorVals[i] == "Null"){
+		colorVals.splice(i,1);
+		i--;
+		index--;
+	   }
+	}
+	
+	var i = 0;
+    for(i = 0; i < xVals.length; i++){
+	   if(xVals[i] == "Null"){
+	    xVals.splice(i,1);
+		i--;
+	   }
+	}
+	
+	var i = 0;
+    for(i = 0; i < yVals.length; i++){
+	   if(yVals[i] == "Null"){
+		yVals.splice(i,1);
+		i--;
+	   }
+	}
+	
+	eraseRectArrayX = [];
+    eraseRectArrayY = [];
+  }
+  
+ 
+
+};
+
+$canvas.bind('mouseup', plot);
+
+$canvas.on('mousedown', function(e){
+
+ if(drawRectStatus == 'yes'){
+  x = Math.floor( (e.pageX - $canvas.offset().left) / tileSize );
+  y = Math.floor( (e.pageY - $canvas.offset().top) / tileSize );
+ 
+  drawRectStart[0] = x;
+  drawRectStart[1] = y;
+  
+  drawRectInit = 'yes';
+ }
+ 
+ if(eraseRectStatus == 'yes'){
+  x = Math.floor( (e.pageX - $canvas.offset().left) / tileSize );
+  y = Math.floor( (e.pageY - $canvas.offset().top) / tileSize );
+ 
+  eraseRectStart[0] = x;
+  eraseRectStart[1] = y;
+  
+  eraseRectInit = 'yes';
+ }
+ 
+});
+
+function drawGrid(){
+
+ //this clears the canvas page so that it can be refreshed
+ ctx.fillStyle = "white"; 
+ ctx.fillRect(0,0, $canvas.width() ,$canvas.height() );
+ 
+ if(rotateVal == 1){
+ 
+   ctx.save();
+   ctx.translate(510,500);
+   ctx.rotate( rotateVal * 90 * Math.PI/180);
+   ctx.drawImage(selectImage, imagePos[0] - 500 ,imagePos[1],imageSize[0] ,imageSize[1]);
+   ctx.restore();
+   
+ }else if(rotateVal == 2){
+ 
+   ctx.save();
+   ctx.translate(510,500);
+   ctx.rotate( rotateVal * 90 * Math.PI/180);
+   ctx.drawImage(selectImage, imagePos[0], imagePos[1],imageSize[0] ,imageSize[1]);
+   ctx.restore();
+   
+ }else if(rotateVal == 3){
+ 
+   ctx.save();
+   ctx.translate(510,500);
+   ctx.rotate( rotateVal * 90 * Math.PI/180);
+   ctx.drawImage(selectImage, imagePos[0], imagePos[1] - 500, imageSize[0], imageSize[1]);
+   ctx.restore();
+   
+ }else{
+  ctx.drawImage(selectImage, imagePos[0] ,imagePos[1] ,imageSize[0] ,imageSize[1]);
+ }
+ 
+ ctx.fillStyle = "hsla(15, 0%, 65%, 0.78)";
+ 
+ var i = 0;
+ for(i = 0; i < $canvas.width(); i+=tileSize){ //Draws all of the horizontal lines of the grid
+  ctx.fillRect(i,0,1,$canvas.height() );
+ }
+ 
+ for(i = 0; i < $canvas.height(); i+=tileSize){ //draws all of the vertical lines of the grid
+  ctx.fillRect(1,i,$canvas.width(),1);
+ }
+ 
+ for(i = 0; i < xVals.length; i++){  //fills in all of the colored pixels
+  ctx.fillStyle = colorVals[i];
+  ctx.fillRect(xVals[i]*tileSize, yVals[i]*tileSize, tileSize, tileSize);
+  
+  if(xVals[i] == null){
+   //window.alert(xVals[i]);
+  }
+ }
+}
+
+function fillColors(){  
+
+    //creates elements with colors from the colorIndex array and apends them after the startingPoint element
+ 
+ var i = 0;
+ for(i = 0; i < colorIndex.length; i++){  //adds the elements back in
+  $element = $('<div class="colors"></div>').css({'background-color': colorIndex[i]}); //create an element with color from colorIndex
+  $element.attr('id', colorIndex[i]); //gives to element an id of colorIndex[1]
+  $startingPoint.after($element);  //appends element after the startingpoint element
+  
+  $element.on('click', function(){
+   $focusColor = this.id;  //gives an event handler to each element 
+   $search.val($focusColor);  //sets the search bar value to the color of the element
+   
+   $(".colors").each(function(){
+    $(this).css({'border-width': '1px'});  //resets all of the elements to a border of one pixel  
+   });
+   
+   $(this).css({'border-width': '2px'});  //gives the selected element a border of 2px 
+  });
+ }
+ $element = 0; //resets the element value to zero;
+}
+
+
+
+$search.on('keydown', function(e){  //when a person types into the search bar
+
+ $('#trash').css({'visibility': 'hidden'}); //makes the trash icon invisible
+ $('#GoBack').css({'visibility': 'visible'}); //makes the back arrow icon visible
+ 
+ var i = 0;
+ for(i = 0; i < colorIndex.length; i++){
+  $(".colors").remove(); //temporarily removes all of the color elements
+ }
+ 
+ if(e.keyCode == '13'){
+ 
+  //again temporarily removing the color elements in case one element is not a color
+  
+  var i = 0;
+  for(i = 0; i < colorIndex.length; i++){
+   $(".colors").remove(); //temporarily removes all of the color elements
+  }
+ 
+  //appends an element with the color of the search bar into the toolbar when the enter key is pressed
+  
+  $element = $('<div class="colors"></div>').css({'background-color': $search.val()});
+  $element.attr('id', $search.val());
+  $startingPoint.after($element);
+  
+  $element.on('click', function(){  //triggered when the element is clicked
+  
+   $('#trash').css({'visibility': 'visible'}); //makes the trash icon visible
+   $('#GoBack').css({'visibility': 'hidden'}); //makes the back arrow icon invisible
+  
+   colorIndex.push( $search.val() );  //add the value of the search bar to the colorIndex array
+  
+   $('.colors').each(function(){
+    $(this).remove();  //temporarily clears the toolbar
+   });
+   
+   fillColors();  //re-adds the new and old colors of the colorsIndex
+   
+   $element = 0;  //resets the element variable
+  });  
+ }
+ 
+});
+
+$trash.on('click', function(){
+
+ delete colorIndex.splice(colorIndex.length - $('#' + $focusColor).index()+2, 1); //deletes the selected element from colorIndex, held by $focusElement
+ 
+ $('#' + $focusColor).remove(); //removes the selected element from the page 
+
+ for(i = 0; i < colorIndex.length; i++){
+   $("#" + colorIndex[i]).remove(); //temporarily removes all of the color elements
+ }
+ 
+ fillColors(); //adds the elements back into the page
+});
+
+$GoBack.on('click', function(){
+ $('#trash').css({'visibility': 'visible'}); //makes the trash icon visible
+ $('#GoBack').css({'visibility': 'hidden'}); //makes the back arrow icon invisible
+ 
+  var i = 0;
+  for(i = 0; i < colorIndex.length; i++){
+   $(".colors").remove(); //temporarily removes all of the color elements
+  }
+  
+ fillColors();
+});
+
+$canvas.on('mousemove', function(e){
+
+  x = Math.floor( (e.pageX - $canvas.offset().left) / tileSize );
+  y = Math.floor( (e.pageY - $canvas.offset().top) / tileSize );
+
+ drawGrid();
+ 
+ fillRectArrayX = [];
+ fillRectArrayY = [];
+ 
+ if(drawRectInit == 'no' && adjPosMove == 'no' && eraseRectInit == 'no'){
+  //adds in the colored pixels
+  ctx.fillStyle = $focusColor;
+  ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+ }else if(drawRectInit == 'yes'){
+ 
+ if(drawRectStart[0] <= x && drawRectStart[1] <= y){
+ 
+ for(i = drawRectStart[0]; i < x+1; i++){
+  for(j = drawRectStart[1]; j < y+1; j++){
+  ctx.fillStyle = $focusColor;
+  ctx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize);
+  
+  fillRectArrayX[fillRectIndex] = i;
+  fillRectArrayY[fillRectIndex] = j;
+  fillRectIndex++;
+  }
+ }
+ 
+ }else if(drawRectStart[0] > x && drawRectStart[1] <= y){
+ 
+  for(i = drawRectStart[0]; i > x-1; i--){
+   for(j = drawRectStart[1]; j < y+1; j++){
+   ctx.fillStyle = $focusColor;
+   ctx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize);
+  
+   fillRectArrayX[fillRectIndex] = i;
+   fillRectArrayY[fillRectIndex] = j;
+   fillRectIndex++;
+   }
+  }
+  
+  
+  }else if(drawRectStart[0] >= x && drawRectStart[1] > y){
+ 
+  for(i = drawRectStart[0]; i > x-1; i--){
+   for(j = drawRectStart[1]; j > y-1; j--){
+   ctx.fillStyle = $focusColor;
+   ctx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize);
+  
+   fillRectArrayX[fillRectIndex] = i;
+   fillRectArrayY[fillRectIndex] = j;
+   fillRectIndex++;
+   }
+  }
+  
+  
+  }else if(drawRectStart[0] < x && drawRectStart[1] >= y){
+ 
+  for(i = drawRectStart[0]; i < x+1; i++){
+   for(j = drawRectStart[1]; j > y-1; j--){
+   ctx.fillStyle = $focusColor;
+   ctx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize);
+  
+   fillRectArrayX[fillRectIndex] = i;
+   fillRectArrayY[fillRectIndex] = j;
+   fillRectIndex++;
+   }
+  }
+  }
+ 
+  fillRectIndex = 0;
+ 
+ }else if(eraseRectStatus == 'yes'){
+ 
+   if(eraseRectStart[0] <= x && eraseRectStart[1] <= y){
+ 
+    for(i = eraseRectStart[0]; i < x+1; i++){
+     for(j = eraseRectStart[1]; j < y+1; j++){
+      ctx.fillStyle = 'pink';
+      ctx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize);
+  
+      eraseRectArrayX[eraseRectIndex] = i;
+      eraseRectArrayY[eraseRectIndex] = j;
+      eraseRectIndex++;
+     }
+    }
+   }
+   
+    eraseRectIndex = 0;
+   
+  }
+ 
+});
+
+$searchImage.on('keydown', function(e){
+ if(e.which == 13){
+  $image.attr('src', $searchImage.val() );
+ }
+});
+
+
+
+$tools.on('mouseover', function(){
+ $(this).css({'color': "red"});
+});
+
+$tools.on('mouseout', function(){
+ $(this).css({'color': "black"});
+});
+
+
+
+$gridTools.on('click', function(){
+
+ if(gridToolsStatus == "closed"){
+  
+  $gridTools.after($addTileSize);
+  $gridTools.after($subTileSize);
+  $gridTools.after($addTileSign);
+  
+  $gridTools.after($addGrid);
+  $gridTools.after($subGrid);
+  $gridTools.after($adjGridSign);
+  
+  gridToolsStatus = "open";
+  
+  $tools = $(".tools");
+ 
+  $tools.on('mouseover', function(){
+   $(this).css({'color': "red"});
+  });
+ 
+  $tools.on('mouseout', function(){
+   $(this).css({'color': "black"});
+  });
+ 
+ $('#addGrid').on('click', function(){
+    $canvas.attr('width', $canvas.width() + 100);
+    $canvas.attr('height', $canvas.height() + 50);
+ 
+    drawGrid();
+  });
+  
+ $('#subGrid').on('click', function(){
+    $canvas.attr('width', $canvas.width() - 100);
+    $canvas.attr('height', $canvas.height() - 50);
+ 
+    drawGrid();
+  });
+ 
+ $('#addTileSize').on('click', function(){
+    tileSize += 1;
+	
+    drawGrid();
+  });
+ 
+ $('#subTileSize').on('click', function(){
+    tileSize -= 1;
+	
+    drawGrid();
+  });
+ 
+ }else{
+  $('#addGrid').remove();
+  $('#subGrid').remove();
+  $('#adjGridSign').remove();
+  
+  $('#addTileSize').remove();
+  $('#subTileSize').remove();
+  $('#addTileSign').remove();
+  
+  gridToolsStatus = "closed";
+ }
+ 
+ });
+ 
+$imageTools.on('click', function(){
+
+ if(imageToolsStatus == "closed"){
+  
+  $imageTools.after($rotate);
+  
+  $imageTools.after($adjPos);
+  
+  $imageTools.after($addHeight);
+  $imageTools.after($subHeight);
+  $imageTools.after($adjHeightSign);
+  
+  $imageTools.after($addWidth);
+  $imageTools.after($subWidth);
+  $imageTools.after($adjWidthSign);
+  
+  $imageTools.after($addSize);
+  $imageTools.after($subSize);
+  $imageTools.after($addSizeSign);
+  
+  $imageTools.after($imageInput);
+  $imageTools.after($adjImage);
+  $imageTools.after($adjImageSign);
+  
+  
+  imageToolsStatus = "open";
+  
+  $tools = $(".tools");
+ 
+  $tools.on('mouseover', function(){
+   $(this).css({'color': "red"});
+  });
+ 
+  $tools.on('mouseout', function(){
+   $(this).css({'color': "black"});
+  });
+ 
+  $specialTools = $(".specialTools");
+ 
+  $specialTools.on('mouseover', function(){
+   $(this).css({'color': "red"});
+  });
+ 
+  $specialTools.on('mouseout', function(){
+   $(this).css({'color': "white"});
+  });
+ 
+  $('#imageInput').on('keydown', function(e){
+  
+   if(e.which == 13){
+    $('#image').attr('src', $("#imageInput").val() );
+	
+	$adjImage = '<img id="adjustedImage" src=' + $('#image').attr('src') + ' alt="The Scream" height="50px" width="50px" style="margin-left: 5px; border: 1px solid black;">';
+    
+    $('#adjustedImage').remove();
+    $('#adjImageSign').remove();
+	
+    $imageTools.after($adjImage);
+    $imageTools.after($adjImageSign);
+	
+	drawGrid();
+   }
+   
+  });
+ 
+  $('#addHeight').on('click', function(){
+    imageSize[1] += 2;
+ 
+    drawGrid();
+  });
+ 
+  $('#subHeight').on('click', function(){
+    imageSize[1] -= 2;
+ 
+    drawGrid();
+  });
+ 
+  $('#addWidth').on('click', function(){
+    imageSize[0] += 2;
+ 
+    drawGrid();
+  });
+ 
+  $('#subWidth').on('click', function(){
+    imageSize[0] -= 2;
+ 
+    drawGrid();
+  });
+ 
+  $('#addSize').on('click', function(){
+    imageSize[0] += 10;
+    imageSize[1] += 10;
+ 
+    drawGrid();
+  });
+  
+  $('#subSize').on('click', function(){
+    imageSize[0] -= 10;
+    imageSize[1] -= 10;
+ 
+    drawGrid();
+  });
+  
+  $('#adjPos').on('click', function(){
+   
+   if(adjPosStatus == 'closed'){
+   
+    adjPosStatus = 'open';
+	
+    $canvasContainer.append($adjPosSquare);
+	$('#adjPosSquare').css({'top': imagePos[1]+100, 'left': imagePos[0]+100});
+	
+   $('#adjPosSquare').on('mouseover', function(){
+    $(this).css({'background-color': "red", 'border': '1px solid red'});
+   });
+ 
+   $('#adjPosSquare').on('mouseout', function(){
+    $(this).css({'background-color': "blue", 'border': '1px solid blue'});
+   });
+   
+   $('#adjPosSquare').on('mousedown', function(){
+   
+    adjPosMove = 'yes';
+   
+    $(this).unbind('mouseover');
+   
+    $('#canvasContainer').on('mousemove', function(e){
+		$('#adjPosSquare').css({'top': e.pageY - 80 + $canvasContainer.scrollTop(), 'left': e.pageX - 200 + $canvasContainer.scrollLeft() });
+		
+		 if(rotateVal == 1){
+		  imagePos[1] = 500 - e.pageX - 300 + $canvasContainer.scrollLeft();
+		  imagePos[0] = e.pageY - 180 + $canvasContainer.scrollTop();
+		 }else if(rotateVal == 2){
+		  imagePos[0] = 500 - e.pageX - 300 + $canvasContainer.scrollLeft();
+		  imagePos[1] = 500 - e.pageY - 180 + $canvasContainer.scrollTop();
+		 }else if(rotateVal == 3){
+		  imagePos[1] = e.pageX - 300 + $canvasContainer.scrollLeft();
+		  imagePos[0] = 500 - e.pageY - 180 + $canvasContainer.scrollTop();
+		 }else{
+		  imagePos[0] = e.pageX - 300 + $canvasContainer.scrollLeft();
+		  imagePos[1] = e.pageY - 180 + $canvasContainer.scrollTop();
+		 }
+		 
+		drawGrid();
+    });
+   
+   });
+   
+   $('#canvasContainer').on('mouseup', function(){
+    $('#canvasContainer').unbind('mousemove');
+	
+	adjPosMove = 'no';
+	
+	$('#adjPosSquare').on('mouseover', function(){
+     $(this).css({'background-color': "red", 'border': '1px solid red'});
+    });
+	
+   });
+   
+ }else{
+  $('#adjPosSquare').remove();
+  
+  adjPosStatus = 'closed';
+ }
+ 
+});
+
+  $('#rotate').on('click', function(){
+  
+  if(rotateVal < 3){
+    rotateVal++;
+  }else{
+    rotateVal = 0;
+  }
+	drawGrid();
+  });
+
+/*
+  $('#displayArrays').on('click', function(){
+  
+    writeArrays();
+	
+	if(displayStatus == 'closed'){
+	 $('#canvasContainer').after($displayPage);
+	 $('#displayPage').html(displayAlert);
+	 
+	 displayStatus = 'open';
+	}else{
+	 $('#displayPage').remove();
+	 
+	 displayStatus = 'closed';
+	}
+	
+  });
+*/
+}else{
+
+  $('#rotate').remove();
+  $('#adjPos').remove();
+  
+  $('#addSize').remove();
+  $('#subSize').remove();
+  $('#addSizeSign').remove();
+  
+  $('#addHeight').remove();
+  $('#subHeight').remove();
+  $('#adjHeightSign').remove();
+  
+  $('#addWidth').remove();
+  $('#subWidth').remove();
+  $('#adjWidthSign').remove();
+  
+  $('#imageInput').remove();
+  $('#adjustedImage').remove();
+  $('#adjImageSign').remove();
+  
+  //$('#displayArrays').remove();
+  
+  imageToolsStatus = "closed";
+}
+
+});
+
+$drawingTools.on('click', function(){
+ 
+ if(drawingToolsStatus == 'closed'){
+   
+   $drawingTools.after($eraseRect);
+   $drawingTools.after($erase);
+   $drawingTools.after($drawRect);
+   
+   $drawingTools.after($compileImage);
+   $drawingTools.after($compileImageSign);
+   
+   drawingToolsStatus = 'open';
+   
+   $specialTools = $(".specialTools");
+ 
+   $specialTools.on('mouseover', function(){
+    $(this).css({'color': "red"});
+   });
+ 
+   $specialTools.on('mouseout', function(){
+    $(this).css({'color': "white"});
+   });
+   
+   $('#erase').on('click', function(){
+    
+	if(eraseTile == 'no' && drawRectStatus == 'no' && eraseRectStatus == 'no'){
+	 $focusColor = "hsla(0, 100%, 80%, 1)";
+	 eraseTile = 'yes';
+	 $('#erase').css({'border': '1px solid red'});
+	}else{
+	 eraseTile = 'no';
+	 $focusColor = "black";
+	 $('#erase').css({'border': '1px solid grey'});
+	}
+   });
+
+   $('#drawRect').on('click', function(){
+     
+	if(drawRectStatus == 'no' && eraseTile == 'no' && eraseRectStatus == 'no'){
+	 drawRectStatus = 'yes';
+	 $('#drawRect').css({'border': '1px solid red'});
+	}else{
+	 drawRectStatus = 'no';
+	 $('#drawRect').css({'border': '1px solid grey'});
+	}
+   });
+   
+   $('#eraseRect').on('click', function(){
+     
+	if(drawRectStatus == 'no' && eraseTile == 'no' && eraseRectStatus == 'no'){
+	 eraseRectStatus = 'yes';
+	 $('#eraseRect').css({'border': '1px solid red'});
+	}else{
+	 eraseRectStatus = 'no';
+	 $('#eraseRect').css({'border': '1px solid grey'});
+	}
+   });
+   
+   $('#compileImage').on('keydown', function(e){
+  
+    if(e.which == 13){
+      getArrays( $('#compileImage').val() );
+	  
+	  //window.alert(String(parseInt(compileX[10]) + 100));
+	  
+	  var i = 0;
+	  for(i = 0; i < compileColors.length; i++){
+	  
+	   xVals[index] =  String(parseInt(compileX[i]) + 10);
+       yVals[index] =  String(parseInt(compileY[i]) + 10);
+       colorVals[index] = compileColors[i];
+       index++;
+	  }
+	  
+    }
+	
+   });
+   
+ }else{
+  $('#erase').remove();
+  $('#drawRect').remove();
+  $('#eraseRect').remove();
+  $('#compileImageSign').remove();
+  $('#compileImage').remove();
+  
+  eraseTile = 'no';
+  drawRectStatus = 'no';
+  $focusColor = "black";
+  
+  drawingToolsStatus = 'closed';
+  
+ }
+ 
+});
+
+
+$('#register').on('submit', function(e){
+
+  writeArrays();
+  //e.preventDefault();
+  
+ // var details = $('#register').serialize();
+  
+  //$.post('php test.php', details);
+  
+});
+
+</script>
+
+</body>
+</html>
