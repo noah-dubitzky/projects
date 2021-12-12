@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+div.cat{
+
+	position: relative;
+	background-color: hsla(218, 100%, 50%, 1);
+	width: 120%;
+	font-size: 220%;
+	padding: 1px;
+	margin-top: 5px;
+	border-radius: 15px;
+	text-align: center;
+	color: white;
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+div.return:hover{
+
+	cursor: pointer;
+	color: white;
+
+}
+
+div.return{
+
+	font-size: 75%;
+	margin-left: 35%;
+	margin-bottom: 10%;
+	color: hsla(218, 100%, 50%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+#cats{
+
+	overflow: none;
+	width: 30%;
+	margin-left: 35%;
+
+}
+
+.checkbox__input{
+
+	height: 35px;
+	width: 35px;
+}
+
+#create-store:hover{
+
+	background-color: hsla(32, 85%, 50%, 1);
+
+}
+
+#create-store{
+
+	border-radius: 15px;
+	width: 28.5%;
+	padding: 30px;
+	background-color: hsla(44, 100%, 58%, 1);
+	margin-left: 35%;
+	margin-top: 10px;
+	cursor: pointer;
+}
+
+img{
+
+	cursor: pointer;
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" >
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Items</p>
+</div>
+
+<div id="cats">
+
+
+</div>
+
+<div class="store" id="create-store"><p>Start Shopping<p></div>
+
+<div class="return">
+	<p>Return to options<p>
+<div>
+
+</body>
+<script type="text/javascript">
+
+	var	items=[];
+	
+	var globalList = JSON.parse(window.localStorage.list);
+	
+	var $back = $(".return");
+	var $cats = $("#cats"); 
+	var $create = $("#create-store");
+	var $img = $("img");
+	
+	var cat = localStorage.getItem("cat");
+	var id = localStorage.getItem("storeID");
+	
+	var id = localStorage.getItem("storeID");
+	
+	$back.on('click', function(){
+	
+		window.location.href = "User_Items_List.html";
+	
+	});
+
+	$create.on('click', function(){
+
+		add();
+		
+		window.localStorage.list = JSON.stringify(globalList);
+
+		window.location.href = "View_List.html";
+
+	});
+	
+	function ShowList(){
+	
+	//use get request to add items into the list
+		for(var i = 0; i < globalList.length; i++)
+		{
+	
+			$cats.prepend( "<div class='cat' id="+i+"><p style='display: inline-block;font-weight: bold;'>" + globalList[i][0] + "</p></div>" );
+			
+			$("#"+i+".cat").append("<p style='margin-top: -5%; font-size: 90%;color: hsla(354, 0%, 72%, 1);' >" + "Price: " + globalList[i][1] + ", Aisle: " + globalList[i][2] + ", Section: " + globalList[i][3] +"</p>");
+			
+			$("#"+i+".cat").append("<img class='trash' id='"+i+"' style='position: absolute; top: 30%; left: 2%;'src='trash.jpg' alt='Girl in a jacket' width='50' height='60'>");
+		
+		}
+		
+		
+		$(".trash").each(function(){
+		
+			$(this).on("click", function(){
+	
+				globalList.splice($(this).attr("id"), 1);
+		
+				window.localStorage.list = JSON.stringify(globalList);
+				
+				$cats.empty();
+				
+				ShowList();
+	
+			});
+			
+		});
+		
+	}
+	
+	ShowList();
+
+</script>
+</html>

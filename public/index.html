@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="Input_Validation.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+#select{
+
+	padding: 10px;
+	width: 30%;
+	margin: auto;
+
+}
+
+#select > div{
+
+	cursor: pointer;
+	padding: 10px;
+	background-color: hsla(194, 100%, 59%, 1);
+	margin-top: 10px;
+	border-radius: 25px;
+	box-shadow: 5px 5px 5px #888888;
+
+}
+
+#select > div:hover {
+
+	background-color: hsla(203, 100%, 59%, 1);
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Select Option</p>
+</div>
+
+
+<div id="select">
+
+	<div id="shopper">shopper</div>
+	<div id="owner">Owner</div>
+
+</div>
+
+</body>
+<script type="text/javascript">
+
+//window.location.href = "StoreLayout.html";
+
+var $shopper = $("#shopper");
+var $owner = $("#owner");
+
+$shopper.on("click", function(){
+
+	window.location.href = "Login.html";
+	localStorage.setItem("type", "shopper");
+
+});
+
+$owner.on("click", function(){
+
+	window.location.href = "Login.html";
+	localStorage.setItem("type", "owner");
+
+});
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

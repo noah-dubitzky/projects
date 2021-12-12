@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+div.cat{
+
+	background-color: hsla(218, 100%, 50%, 1);
+	width: 95%;
+	font-size: 220%;
+	padding: 1px;
+	margin-top: 5px;
+	border-radius: 15px;
+	text-align: center;
+	color: white;
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+div.return:hover{
+
+	cursor: pointer;
+	color: white;
+
+}
+
+div.return{
+
+	font-size: 75%;
+	margin-left: 35%;
+	margin-bottom: 10%;
+	color: hsla(218, 100%, 50%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+#cats{
+
+	overflow: none;
+	width: 30%;
+	margin-left: 35%;
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" >
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Items</p>
+</div>
+
+<div id="cats">
+
+
+</div>
+
+<div class="return">
+	<p>Return to options<p>
+<div>
+
+</body>
+<script type="text/javascript">
+
+	var $back = $(".return");
+	var $cats = $("#cats"); 
+	
+	var cat = localStorage.getItem("cat");
+	var id = localStorage.getItem("storeID");
+	
+	var id = localStorage.getItem("storeID");
+	
+	$back.on('click', function(){
+	
+		window.location.href = "Cat_List.html";
+	
+	});
+	
+	
+	$.get("/items/"+id+"/"+cat, function(data, status){
+	
+		for(var i = 0; i < data.length; i++)
+		{
+			$cats.prepend( "<div class='cat' ><p>" + data[i].name + "<p></div>" );
+		}
+	
+	});
+
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

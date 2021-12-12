@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="createTemps.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+html, body{
+    height: 100%;
+}
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+	margin-top: -3%;
+
+}
+
+p.back:hover{
+
+	cursor: pointer;
+	color: white;
+
+}
+
+#nav{
+
+	border-bottom: 1px solid hsla(158, 0%, 90%, 1);
+	overflow: hidden;
+
+}
+
+.page {
+  position: relative;
+  height: 70%;
+  width: 80%;
+  margin: auto;
+  border: 2px solid aqua;
+  text-align: left;
+  background-color: white;
+}
+
+.page .back {
+  margin-top: 0px;
+  top: 100%;
+  position: absolute;
+  line-height: 1.5;
+  display: inline-block;
+  vertical-align: bottom;
+  color: blue;
+}
+
+.opt{
+
+	display: inline-block;
+	margin-right: -5px;
+	font-size: 120%;
+	cursor: pointer;
+
+}
+
+.opt a{
+
+	padding: 10px 12px;
+	display: inline-block;
+	margin-bottom: -1px;
+
+}
+
+.opt a.dis{
+
+	padding: 10px 12px;
+	display: inline-block;
+	border-radius: 10px;
+	margin: 0px;
+
+}
+
+.dropdown > a{
+
+	display: block;
+
+}
+
+.dropdown{
+
+	position: absolute;
+	display: none;
+	color: blue;
+
+}
+
+.dropdown a{
+
+	padding: 0px 0px 0px 10px;
+	width: 110%;
+	border: 1px solid hsla(158, 0%, 90%, 1);
+
+}
+
+.dropdown a:hover{
+
+	background-color: grey;
+	cursor: pointer;
+
+}
+
+.dis:hover{
+
+	cursor: pointer;
+	background-color: hsla(158, 0%, 93%, 1);
+
+}
+
+.opt:hover .dropdown{
+
+	display: block;
+
+}
+
+.shelf{
+
+	position: absolute;
+	border: 1px solid black;
+	padding: 10px;
+	margin: 0px;
+	padding: 0px;
+	cursor: pointer;
+	user-select:none;
+
+}
+
+.shelf:hover{
+
+	background-color: hsla(186, 100%, 60%, 1);
+
+}
+
+.select{
+	
+	position: relative;
+	text-align: center;
+	border: 1px solid hsla(186, 100%, 60%, 1);
+	box-shadow: 5px 10px 18px #888888;
+	background-color: white;
+	display: none;
+	width: 40%;
+	height: 40%;
+	margin: auto;
+	margin-top: -35%;
+	z-index: 10;
+
+}
+
+#temp1, #temp2{
+
+	display: inline-block;
+	border: 1px solid grey;
+	padding: 1%;
+	margin: 8%;
+	cursor: pointer;
+
+}
+
+#temp1:hover, #temp2:hover{
+
+	border-color: hsla(186, 100%, 60%, 1);
+	box-shadow: 5px 10px 18px #888888;
+
+}
+
+.aisle{
+
+	position: absolute;
+
+}
+
+.span {
+
+  height: 23px;
+  border: 1px solid black;
+  display: inline-block;
+  
+}
+
+.block {
+
+  width: 23px;
+  height: 48px;
+  border: 1px solid black;
+  display: block;
+  
+}
+
+.span:hover{
+
+	cursor: pointer;
+	background-color: blue;
+
+}
+
+.block:hover{
+
+	cursor: pointer;
+	background-color: blue;
+
+}
+
+.displayInfo{
+
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	display: none;
+	z-index: 100;
+	background-color: white;
+	border: 1px solid blue;
+	padding: 5px;
+
+}
+
+#stores{
+
+	position: absolute;
+	margin: auto;
+	left: 40%;
+	top: 20%;
+	height: 50%;
+	display: none;
+	z-index: 100;
+	background-color: white;
+	border: 1px solid blue;
+	padding: 5px;
+	overflow: scroll;
+
+}
+
+div.store{
+
+	background-color: hsla(218, 100%, 50%, 1);
+	width: 95%;
+	font-size: 220%;
+	padding: 1px;
+	margin-top: 5px;
+	border-radius: 15px;
+	text-align: center;
+	color: white;
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+.store:hover{
+
+	background-color: hsla(44, 100%, 58%, 1);
+	cursor: pointer;
+
+}
+
+.displayInfo > div > p
+{
+
+	display: inline-block;
+
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="container" >
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Select Category</p>
+</div>
+
+<div class="page">
+
+	<div id="nav">
+	
+		<div class="opt" id="file">
+			<a class="dis">file</a>
+			<div class="dropdown">
+				<a id="create">create store</a>
+				<a id="save">save store</a>
+				<a id="open">open store</a>
+			</div>
+		</div>
+		
+		<div class="opt" id="edit">
+			<a class="dis">edit</a>
+			<div class="dropdown">
+				<a id="chnge_lay">Change Layout</a>
+				<a id="configure">Configure</a>
+				<a id="info">Display Info</a>
+			</div>
+		</div>
+		
+		<div class="opt" id="help">
+			<a class="dis">help</a>
+		</div>
+		
+	</div>
+	
+	<div id="message" style="position: relative; margin: auto; width: 10%; margin-top: 15%;">No Stores Opened</div>
+	
+  <p class="back">Return to options<p>
+  
+</div>
+
+<div id="select_temp" class="select">
+	<h2>Select Template</h2>	
+	<div id="temp1">
+		<img src="Template_2.png" alt="Girl in a jacket" width="100" height="100">
+		<p>Perpendicular</p>
+	</div>
+	<div id="temp2">
+		<img src="Template_1.png" alt="Girl in a jacket" width="100" height="100">
+		<p>Parrallel</p>
+	</div>
+</div>
+
+<div id="config" class="select">
+
+	<div>
+		<p style="font-size: 200%;margin-top: 1%;">Configure Store <p>
+	</div>
+		
+  <span>
+	<p># aisles:</p> 
+	<input type="text" id="aisle" name="fav_language" value="">
+  </span>
+	  
+  <span>
+	<p># sections:</p> 
+	<input type="text" id="sec" name="fav_language" value="">
+  </span>
+  
+  <input style="display: block;margin: auto;margin-top: 5%;" type="button" id="submitConfig" name="fav_language" value="submit">
+	
+</div>
+
+<div class="displayInfo">
+
+
+	<div>
+		<p>Aisle #: </p>
+		<p id="aisleNumber"></p>
+	</div>
+	
+	<div>
+		<p>Section #: </p>
+		<p id="secNumber"></p>
+	</div>
+	
+	<div>
+		<p>Items: </p>
+		<p id="items"></p>
+	</div>
+
+</div>
+
+<div id="stores">
+
+
+</div>
+
+</body>
+<script type="text/javascript">
+
+var $create = $("#create");
+var $open = $("#open");
+var $config = $("#configure");
+var $change = $("#chnge_lay");
+
+var $message = $("#message");
+var $nav = $("#nav");
+
+var $back = $(".back");
+
+var $display = $("#display");
+
+var $aisleNumber = $("#aisleNumber");
+var $secNumber = $("#secNumber");
+
+var $temp = $("#select_temp");
+var $select = $(".select");
+var $configPage = $("#config");
+var $stores = $("#stores");
+
+var $submitConfig = $("#submitConfig");
+
+var pageOpen = false;
+var storeOpen = false;
+
+var $temp1 = $("#temp1");
+var $temp2 = $("#temp2");
+
+var temp = 0;
+
+$back.on("click", function(){
+
+	if(localStorage.getItem("type") == "owner"){
+				
+			window.location.href = "options.html";
+					
+	}else{
+				
+			window.location.href = "User_Stores_List.html";
+				
+	}
+
+});
+
+$(window).on("click", function(){
+
+	$temp.css({"display": "none"});
+	$configPage.css({"display": "none"});
+	pageOpen = false;
+
+});
+
+$select.on("click", function(event){
+
+	event.stopPropagation();
+
+});
+
+$config.on("click", function(event){
+
+	if(!pageOpen && storeOpen){
+	
+		$configPage.css({"display": "block"});
+		pageOpen = true;
+		
+	}else{
+	
+		$configPage.css({"display": "none"});
+		pageOpen = false;
+	
+	}
+	
+	if(!storeOpen)
+	{
+	
+		window.alert("No store is open");
+	
+	}
+	
+	event.stopImmediatePropagation();
+
+});
+
+$open.on("click", function(event){
+
+	if(!pageOpen && !storeOpen){
+	
+		$stores.css({"display": "block"});
+		pageOpen = true;
+		
+		$.get("/stores", function(data, status){
+	
+			for(var i = 0; i < data.length; i++)
+			{
+				$stores.prepend( "<div class='store' id="+data[i].id+"><p>" + data[i].name + "<p></div>" );
+			}
+			var $store = $(".store"); 
+		
+			$store.each( function(event) {
+
+				$(this).on("click", function(){
+	
+					openStore( $(this).attr("id") );
+					localStorage.setItem("storeID", $(this).attr("id") );
+					
+					$stores.css({"display": "none"});
+					$message.css({"display": "none"});
+					pageOpen = false;
+         
+				});
+			
+			});
+
+		});
+		
+	}else{
+	
+		$stores.css({"display": "none"});
+		pageOpen = false;
+	
+	}
+	
+	if(storeOpen)
+	{
+	
+		window.alert("Save store before opening another");
+	
+	}
+	
+	event.stopImmediatePropagation();
+
+});
+
+$change.on("click", function(event){
+
+	if(!pageOpen && storeOpen){
+	
+		$temp.css({"display": "block"});
+		tempOpen = true;
+	
+	}else{
+	
+		$temp.css({"display": "none"});
+		tempOpen = false;
+	
+	}
+	
+	if(!storeOpen)
+	{
+	
+		window.alert("You must first create store");
+	
+	}
+	
+	event.stopPropagation();
+
+});
+
+$submitConfig.on("click", function(){
+	
+	numAisle = $("#aisle").val();
+	numSec = $("#sec").val();
+	
+	if(numSec <= 4 || numAisle <= 4 || numSec > 10 || numAisle > 10)
+	{
+	
+		window.alert("Both values must be between 4 and 11");
+		return;
+	
+	}else if(numSec%2 == 1){
+	
+		window.alert("number of sections must be even");
+		return;
+	
+	}else{
+	
+		$(".aisle").remove();
+	    $configPage.css({"display": "none"});
+		pageOpen = false;
+	
+	}
+	
+	if(temp == 1)
+	{
+		
+		createTemp1( numSec, numAisle);
+		
+	}
+	
+	if(temp == 2)
+	{
+	
+		createTemp2( numSec, numAisle);
+		
+	}
+
+});
+
+$create.on("click", function(event){
+
+	if(!pageOpen && !storeOpen){
+	
+		$temp.css({"display": "block"});
+		tempOpen = true;
+	
+	}else{
+	
+		$temp.css({"display": "none"});
+		tempOpen = false;
+	
+	}
+	
+	if(storeOpen)
+	{
+	
+		window.alert("Save store before creating another");
+	
+	}
+	
+	event.stopPropagation();
+
+});
+
+$create.on("click", function(event){
+
+	if(!pageOpen && !storeOpen){
+	
+		$temp.css({"display": "block"});
+		tempOpen = true;
+	
+	}else{
+	
+		$temp.css({"display": "none"});
+		tempOpen = false;
+	
+	}
+	
+	if(storeOpen)
+	{
+	
+		window.alert("Save store before creating another");
+	
+	}
+	
+	event.stopPropagation();
+
+});
+
+$temp2.on("click", function(){
+
+	$(".aisle").remove();
+
+	$temp.css({"display": "none"});
+	tempOpen = false;
+	
+	temp = 2;
+	
+	$message.css({"display": "none"});
+	
+	createTemp2(10, 10, null, false);
+	
+	storeOpen = true;
+	
+	event.stopPropagation();
+
+});
+
+$temp1.on("click", function(){
+
+	$(".aisle").remove();
+
+	$temp.css({"display": "none"});
+	tempOpen = false;
+	
+	temp = 1;
+	
+	$message.css({"display": "none"});
+	
+	createTemp1(10, 10, null, false);
+	
+	storeOpen = true;
+	
+	event.stopPropagation();
+
+});
+
+//window.alert(localStorage.getItem("type") + ", " + localStorage.getItem("LayoutType") );
+
+if(localStorage.getItem("type") == "owner" && localStorage.getItem("LayoutType") == "creating"){
+				
+	createTemp1(10, 10, null, false);
+
+	$stores.css({"display": "none"});
+	$message.css({"display": "none"});
+	temp = 2;
+	pageOpen = false;
+	storeOpen = true;
+					
+}
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
