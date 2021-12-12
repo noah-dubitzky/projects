@@ -5,3 +5,7 @@ In order to run this application, the following files must be placed in a web se
   -backup_files
   -index.html
 I have pre-recorded videos of the game play. 
+
+Here is a link to play the game: http://noahsgames.epizy.com/PGP_InfinityFree_Version/
+
+Here is a link to watch some gameplay: https://youtu.be/7XkP2nq6CYI
