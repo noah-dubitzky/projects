@@ -4,6 +4,8 @@ This project was written in HTML, CSS, Javascript, Jquery, and node.js. The App 
 
 The website allows for store owners to set up their store layouts and inventory online, so that shoppers can access them and shop conviniently at their stores. It also allows for shoppers to shop at a store by creating a shopping list using the inventory of the given store. 
 
+The images are screenshots from the webpage.
+
 For Full Detailed demo of Website: https://youtu.be/XP_fnQiQUgk
 
 For faster demo of website: https://youtu.be/XP_fnQiQUgk
