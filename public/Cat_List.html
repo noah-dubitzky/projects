@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+div.cat{
+
+	background-color: hsla(218, 100%, 50%, 1);
+	width: 95%;
+	font-size: 220%;
+	padding: 1px;
+	margin-top: 5px;
+	border-radius: 15px;
+	text-align: center;
+	color: white;
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+div.return:hover{
+
+	cursor: pointer;
+	color: white;
+
+}
+
+div.cat:hover{
+
+	cursor: pointer;
+	background-color: hsla(191, 100%, 50%, 1);
+
+}
+
+div.return{
+
+	font-size: 75%;
+	margin-left: 35%;
+	margin-bottom: 10%;
+	color: hsla(218, 100%, 50%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+.cats{
+
+	overflow: none;
+	width: 30%;
+	margin-left: 35%;
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" >
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Select Category</p>
+</div>
+
+<div class="cats">
+
+
+</div>
+
+<div class="return">
+	<p>Return to Store List<p>
+<div>
+
+</body>
+<script type="text/javascript">
+
+	var $back = $(".return");
+	var $cats = $(".cats");
+	
+	$back.on('click', function(){
+	
+	
+		if(localStorage.getItem("type") == "owner")
+		{
+		
+			window.location.href = "Stores_List.html";
+		
+		}else{
+		
+			window.location.href = "User_Stores_List.html";
+		
+		}
+	
+	});
+	
+	$.get("/categories/1", function(data, status){
+	
+	
+		for(var i = 0; i < data.length; i++)
+		{
+			$cats.prepend( "<div class='cat' id='"+data[i].category+"' ><p>" + data[i].category + "<p></div>" );
+			
+		}
+		
+		$( ".cat" ).each(function(index) {
+		
+			$(this).on("click", function(){
+				
+				localStorage.setItem("cat",  $(this).attr('id'));
+				//window.location.href = "Items_List.html";
+				
+				if(localStorage.getItem("type") == "owner")
+				{
+				
+					window.location.href = "Items_List.html";
+				
+				}else{
+				
+					window.location.href = "User_Items_List_Database.html";
+					
+				}
+				
+			});
+			
+		});
+		
+	
+	});
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

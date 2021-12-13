@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="Input_Validation.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+div.input{
+
+	padding: 10px;
+	background-color: white;
+	margin-left: 34%;
+	width: 25%;
+	border-radius: 15px;
+
+}
+
+input{
+
+	background-color: hsla(78, 0%, 91%, 1);
+	font-size: 100%;
+	width: 100%;
+	outline: none;
+	margin-top: -10px;
+	margin-bottom: 0;
+	display: block;
+	border-radius: 5px;
+	padding: 3px;
+}
+
+input:not(#submit){
+
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+	color: hsla(281, 0%, 33%, 1);
+}
+
+#submit{
+
+	width: 20%;
+	border-radius: 15px;
+	border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+	box-shadow: 2px 2px 2px lightgrey;
+	margin-top: 17px;
+	margin-bottom: 10px;
+
+}
+
+#submit:hover
+{
+	
+	cursor: pointer;
+	background-color: hsla(199, 100%, 46%, 1);
+
+}
+
+span{
+
+	display: inline-block;
+
+}
+
+#err{
+
+	display: none;
+	color: red;
+	font-size: 90%;
+}
+
+.opts{
+
+	font-size: 80%;
+	color: blue;
+	width: 10%;
+	margin-left: 34.1%;
+	margin-top: 1%;
+	cursor: pointer;
+
+}
+
+.opts:hover{
+
+	color: white;
+
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="container">
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Login</p>
+</div>
+
+<div class="input">
+
+	<p>Email:</p> 
+	<input type="text" id="3" name="fav_language" value="">
+	  
+	<p>Password:</p> 
+	<input type="password" id="4" name="fav_language" value="">
+	
+	<input type="button" id="submit" name="fav_language" value="submit">
+	
+	<div id="err">
+	</div>
+
+</div>
+
+<p class="opts" id="signup">Sign Up</p>
+<p class="opts" id="home">Back to Home Page</p>
+
+</body>
+<script type="text/javascript">
+
+var $submit = $('#submit');
+var $signup = $("#signup");
+var $home = $("#home");
+
+$signup.on('click', function(){
+	
+	window.location.href = "signup.html";
+	
+});
+
+$home.on('click', function(){
+	
+	window.location.href = "index.html";
+	
+});
+
+
+$submit.on('click', function(){
+	   
+	var arr = {  
+			   email: $('#3').val(),
+			   PWord: $('#4').val()
+			}
+			
+	var valid = true;
+	var found = false;
+	
+	if( arr.email.length == 0 || arr.PWord.length == 0)
+	{
+		$('#err').append("<p>*not all of the fields have been entered<p>");
+		$('#err').css({'display': 'block'});
+		
+		valid = false;
+	}
+	
+	if( !ValidateEmail(arr.email) )
+	{
+		$('#err').append("<p>*invalid email address<p>");
+		$('#err').css({'display': 'block'});
+		
+		valid = false;
+	}
+	
+    if(valid)
+	{
+		$.get("/users/" + arr.email + "/" + arr.PWord, function(data, status){
+		
+			
+			if(status == "success"){
+			
+			    localStorage.setItem("userID", data.id);
+				localStorage.setItem("name", data.fName);
+				
+				if(localStorage.getItem("type") == "owner"){
+				
+					window.location.href = "options.html";
+					
+				}else{
+				
+					window.location.href = "User_Stores_List.html";
+				
+				}
+				
+			}else{
+			
+				window.alert(status);
+			
+			}
+			
+			
+		}).fail(function(jqXHR, textStatus, errorThrown){
+		
+			if(jqXHR.status == 404) {
+
+				window.alert("user not found");
+				
+			}
+			
+		});
+		
+	}
+			
+			
+});
+    </script>
+</html>
+
+
+
+
+
+
+
+

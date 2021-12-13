@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+div.list-stores, div.create-store, div.open{
+
+	background-color: hsla(218, 100%, 50%, 1);
+	font-size: 220%;
+	border-radius: 15px;
+	margin: 10px;
+	width: 90%;
+	text-align: center;
+	padding: 1px;
+	color: white;
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+div.create-store{
+
+	top: 50%;
+
+}
+
+div.return:hover{
+
+	cursor: pointer;
+	color: white;
+
+}
+
+div.list-stores:hover, div.create-store:hover, div.open:hover{
+
+	cursor: pointer;
+	background-color: hsla(191, 100%, 50%, 1);
+
+}
+
+div.return{
+
+	position: absolute;
+	font-size: 75%;
+	left: 37.2%;
+	top: 70%;
+	text-align: center;
+	color: hsla(218, 100%, 50%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+#opts{
+
+	padding: 5px;
+	width: 30%;
+	margin: auto;
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" >
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Select Options</p>
+</div>
+
+<div id="opts">
+
+	<div class="list-stores">
+		<p>List Stores</p>
+	</div>
+
+	<div class="create-store">
+		<p>Create Stores</p>
+	</div>
+
+	<div class="open">
+		<p>Open Manager</p>
+	</div>
+
+</div>
+
+	<div class="return">
+		<p>Return to login</p>
+	</div>
+
+
+</body>
+<script type="text/javascript">
+
+	var $title = $("p.title");
+	var $create = $(".create-store");
+	var $list = $(".list-stores");
+	var $open = $(".open");
+	var $back = $(".return");
+	
+	var userID = localStorage.getItem("userID");
+	var name = localStorage.getItem("name");
+	
+	//window.alert(name);
+	
+	$.get("/users/" + userID, function(data, status){
+	
+		$title.text("Welcome " + data.fName);
+	
+	});
+	
+	$create.on('click', function(){
+	
+		window.location.href = "Store_Create.html";
+	
+	});
+	
+	$list.on('click', function(){
+	
+		window.location.href = "Stores_List.html";
+	
+	});
+	
+	$open.on('click', function(){
+	
+		localStorage.setItem("LayoutType", "opening");
+		window.location.href = "StoreLayout.html";
+	
+	});
+	
+	$back.on('click', function(){
+	
+		window.location.href = "index.html";
+	
+	});
+
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

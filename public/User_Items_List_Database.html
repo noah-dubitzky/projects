@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-3.0.0.min.js"></script>
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+
+	margin: 0px;
+	padding: 0px;
+	background-color: rgba(45,190,205,255);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+
+p.title{
+
+	font-size: 350%;
+	color: hsla(44, 100%, 58%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+	font-weight: bold;
+
+}
+
+p.subtitle{
+
+	font-size: 220%;
+	color: white;
+	font-weight: bold;
+	margin-top: -10%;
+}
+
+div.container{
+
+	margin: auto;
+	width: 30%;
+
+}
+
+div.cat{
+
+	background-color: hsla(218, 100%, 50%, 1);
+	width: 120%;
+	font-size: 220%;
+	padding: 1px;
+	margin-top: 5px;
+	border-radius: 15px;
+	text-align: center;
+	color: white;
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+div.return:hover{
+
+	cursor: pointer;
+	color: white;
+
+}
+
+div.return{
+
+	font-size: 75%;
+	margin-left: 35%;
+	margin-bottom: 10%;
+	color: hsla(218, 100%, 50%, 1);
+	font-family: "Trebuchet MS", "sans-serif", monospace;
+
+}
+
+#cats{
+
+	overflow: none;
+	width: 30%;
+	margin-left: 35%;
+
+}
+
+.checkbox__input{
+
+	height: 35px;
+	width: 35px;
+}
+
+#create-store:hover{
+
+	background-color: hsla(32, 85%, 50%, 1);
+
+}
+
+#create-store{
+
+	border-radius: 15px;
+	width: 28.5%;
+	padding: 30px;
+	background-color: hsla(44, 100%, 58%, 1);
+	margin-left: 35%;
+	margin-top: 10px;
+	cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" >
+	<p class="title">Market Mapping</p>
+	<p class="subtitle">Items</p>
+</div>
+
+<div id="cats">
+
+
+</div>
+
+<div class="store" id="create-store"><p>Add to list<p></div>
+
+<div class="return">
+	<p>Return to Categories<p>
+<div>
+
+</body>
+<script type="text/javascript">
+
+	var	items=[];
+
+	var $back = $(".return");
+	var $cats = $("#cats"); 
+	var $create = $("#create-store");
+	
+	var cat = localStorage.getItem("cat");
+	var storeId = localStorage.getItem("storeID");
+	var userId = localStorage.getItem("userID");
+	
+	$back.on('click', function(){
+	
+		window.location.href = "Cat_List.html";
+	
+	});
+
+	$create.on('click', function(){
+
+		add();
+		
+		//window.localStorage.list = JSON.stringify(globalList);
+
+		window.location.href = "View_List_Database.html";
+
+	});
+	
+	$.get("/items/"+storeId+"/"+cat, function(data, status){
+	
+		for(var i = 0; i < data.length; i++)
+		{
+			$cats.prepend( "<div class='cat' ><input class='checkbox__input' id='" + i +"' type='checkbox' style='display: inline-block;' name='myCheckboxName' id ='myCheckboxID'><p style='display: inline-block;'>" + data[i].name + "<p></div>" );
+		
+			items[i] = data[i].id;
+			
+		}
+
+		
+	
+	}).done(function(){
+
+	});
+
+	function add(){
+
+		//run the get request to get the 
+		var $inputs=$(".checkbox__input");
+		var length=$inputs.length;
+		
+		//globalList = JSON.parse(window.localStorage.list);
+		
+		//window.alert(globalList.length);
+
+		var trav = 0;
+
+		$inputs.each(function(index) {
+		
+			var id = $(this).attr("id");
+			
+			//window.alert(items[id]);
+		
+			var arr = {
+			
+				storeId: storeId,
+				userId: userId,
+				itemId: items[id],
+				entryDate: "1111-11-12"
+			
+			};
+
+			if( $(this).is(":checked") ){
+
+				$.post("/addList", arr, function(err, status){
+				
+				
+				});
+
+			}
+		});
+
+	}
+	
+</script>
+</html>
+
+
+
+
